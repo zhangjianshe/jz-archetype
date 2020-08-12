@@ -38,17 +38,5 @@ public class RabbitMessageQueueConfigure {
         return new RabbitServerInformation();
     }
 
-    @Bean(name = "rabbit.server2.connectionFactory")
-    public CachingConnectionFactory server2ConnectionFactory(
-            @Qualifier("rabbit.server2.information") RabbitServerInformation serverInformation) {
-        return createRabbitConnectionFactory(serverInformation);
-    }
-
-    @Bean(name = "rabbit.server1.connectionFactory")
-    public CachingConnectionFactory server1ConnectionFactory(
-            @Qualifier("rabbit.server1.information") RabbitServerInformation serverInformation) {
-            return createRabbitConnectionFactory(serverInformation);
-    }
-
 
 }
