@@ -11,6 +11,7 @@
         <module>jz-archetype-rpc</module>
         <module>jz-archetype-client</module>
         <module>jz-archetype-common</module>
+        <module>jz-archetype-mq</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -29,6 +30,7 @@
         <api-tools.version>3.3.0</api-tools.version>
         <curator.version>4.2.0</curator.version>
         <dubbo.version>2.6.3</dubbo.version>
+        <micrometer.version>1.5.3</micrometer.version>
     </properties>
 
     <dependencyManagement>
@@ -45,11 +47,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -61,15 +70,15 @@
             <artifactId>curator-framework</artifactId>
             <version>${curator.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <version>${curator.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
     </dependencies>
-
-
-
 </project>

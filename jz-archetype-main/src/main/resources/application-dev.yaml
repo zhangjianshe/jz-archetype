@@ -11,6 +11,19 @@ dubbo:
     name: dubbo
     port: 20880
 
+
+rabbbitmq1:
+  host: 192.168.0.86
+  port: 5672
+  username: admin
+  password: 123456
+
+rabbbitmq2:
+  host: 192.168.0.78
+  port: 5672
+  username: admin
+  password: 123456
+
 mapway:
   apidoc:
     enabled: true #开启或者关闭文档

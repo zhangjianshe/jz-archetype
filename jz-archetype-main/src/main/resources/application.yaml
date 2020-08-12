@@ -2,3 +2,15 @@
 spring:
   profiles:
     active: dev
+  application:
+    name: jz-archetype
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: *
+  metrics:
+    tags:
+      application: ${spring.application.name}

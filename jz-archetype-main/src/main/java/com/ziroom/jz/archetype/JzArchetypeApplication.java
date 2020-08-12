@@ -1,8 +1,12 @@
 package com.ziroom.jz.archetype;
 
 import com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScans;
 
 /**
@@ -16,5 +20,16 @@ public class JzArchetypeApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(JzArchetypeApplication.class, args);
+	}
+
+	/**
+	 * micrometer 注册中心，收集本应用的所有监控指标
+	 * @param applicationName
+	 * @return
+	 */
+	@Bean
+	MeterRegistryCustomizer<MeterRegistry> micrometerRegistryConfigure(
+			@Value("${spring.application.name}") String applicationName) {
+		return (registry) -> registry.config().commonTags("application", applicationName);
 	}
 }
