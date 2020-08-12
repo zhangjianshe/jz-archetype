@@ -4,6 +4,9 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.ziroom.jz.archetype.client.IHelloWorld;
 import com.ziroom.jz.archetype.client.model.HelloReq;
 import com.ziroom.jz.archetype.client.model.HelloResp;
+import com.ziroom.jz.archetype.mq.rabbit.configure.RabbitServerLocal;
+import com.ziroom.jz.archetype.mq.rabbit.model.MessageHello;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,10 +18,15 @@ import org.springframework.stereotype.Component;
 @Service
 public class IHelloWorldImpl implements IHelloWorld {
 
+    @Autowired
+    RabbitServerLocal rabbitLocal;
+
     @Override
     public HelloResp hello(HelloReq req) {
         HelloResp resp = new HelloResp();
         resp.data = "Hello " + req.userName;
+        MessageHello hello = new MessageHello();
+        rabbitLocal.send(hello);
         return resp;
     }
 }

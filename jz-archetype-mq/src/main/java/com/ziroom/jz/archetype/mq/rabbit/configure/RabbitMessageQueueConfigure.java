@@ -1,7 +1,5 @@
 package com.ziroom.jz.archetype.mq.rabbit.configure;
 
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RabbitMessageQueueConfigure {
-
-    public final static String QUEUE_NAME_HELLO = "hello-mq";
 
 
     /**

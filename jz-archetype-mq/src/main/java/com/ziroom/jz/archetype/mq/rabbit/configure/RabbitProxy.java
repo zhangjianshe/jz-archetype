@@ -1,8 +1,16 @@
 package com.ziroom.jz.archetype.mq.rabbit.configure;
 
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.AcknowledgeMode;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
+import org.springframework.amqp.support.ConsumerTagStrategy;
+
+import java.util.UUID;
 
 /**
  * Rabbit MQ Proxy
@@ -10,7 +18,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * 子类具体处理某一个Rabbit MQ的逻辑代码
  * 在 <code>OnInitialize()</code> 方法中创建交换机和队列以及绑定关系
  */
-public abstract class RabbitProxy {
+public abstract class RabbitProxy implements ChannelAwareMessageListener {
 
     public RabbitAdmin getAdmin() {
         return admin;
@@ -33,13 +41,34 @@ public abstract class RabbitProxy {
     private final RabbitServerInformation serverInformation;
     private final CachingConnectionFactory connectionFactory;
     private final RabbitTemplate rabbitTemplate;
+    private final SimpleMessageListenerContainer listenerContainer;
+
 
     public RabbitProxy(RabbitServerInformation serverInformation) {
         this.serverInformation = serverInformation;
         this.connectionFactory = createRabbitConnectionFactory(serverInformation);
         this.rabbitTemplate = createTemplate(connectionFactory);
         this.admin = createAdmin(connectionFactory);
-        this.onInitialize();
+        this.listenerContainer = createListener(connectionFactory);
+        this.listenerContainer.setMessageListener(this);
+        this.onInitialize(admin, rabbitTemplate, listenerContainer);
+    }
+
+    private SimpleMessageListenerContainer createListener(CachingConnectionFactory connectionFactory) {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConcurrentConsumers(1);    //当前的消费者数量
+        container.setMaxConcurrentConsumers(5); //  最大的消费者数量
+        container.setDefaultRequeueRejected(false); //是否重回队列
+        container.setAcknowledgeMode(AcknowledgeMode.AUTO); //签收模式
+        container.setExposeListenerChannel(true);
+        container.setConsumerTagStrategy(new ConsumerTagStrategy() {    //消费端的标签策略
+            @Override
+            public String createConsumerTag(String queue) {
+                return queue + "_" + UUID.randomUUID().toString();
+            }
+        });
+
+        return container;
     }
 
 
@@ -77,6 +106,7 @@ public abstract class RabbitProxy {
         });
         rabbitTemplate.setReturnCallback((message, code, s, exchange, routingKey) -> {
         });
+
         return rabbitTemplate;
     }
 
@@ -94,6 +124,17 @@ public abstract class RabbitProxy {
 
     /**
      * 初始化,子类在此方法中创建交换机和队列以及绑定关系
+     *
+     * @param admin
+     * @param template
+     * @param listenerContainer
      */
-    protected abstract void onInitialize();
+    protected abstract void onInitialize(RabbitAdmin admin, RabbitTemplate template, SimpleMessageListenerContainer listenerContainer);
+
+    @Override
+    public void onMessage(Message message, Channel channel) throws Exception {
+        handleMessage(message, channel);
+    }
+
+    protected abstract void handleMessage(Message message, Channel channel);
 }
