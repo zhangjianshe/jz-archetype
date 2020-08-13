@@ -9,6 +9,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.amqp.support.ConsumerTagStrategy;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationListener;
 
 import java.util.UUID;
 
@@ -18,7 +20,7 @@ import java.util.UUID;
  * 子类具体处理某一个Rabbit MQ的逻辑代码
  * 在 <code>OnInitialize()</code> 方法中创建交换机和队列以及绑定关系
  */
-public abstract class RabbitProxy implements ChannelAwareMessageListener {
+public abstract class RabbitBroker implements ChannelAwareMessageListener, ApplicationListener<ApplicationStartedEvent> {
 
     public RabbitAdmin getAdmin() {
         return admin;
@@ -44,7 +46,7 @@ public abstract class RabbitProxy implements ChannelAwareMessageListener {
     private final SimpleMessageListenerContainer listenerContainer;
 
 
-    public RabbitProxy(RabbitServerInformation serverInformation) {
+    public RabbitBroker(RabbitServerInformation serverInformation) {
         this.serverInformation = serverInformation;
         this.connectionFactory = createRabbitConnectionFactory(serverInformation);
         this.rabbitTemplate = createTemplate(connectionFactory);
@@ -55,7 +57,7 @@ public abstract class RabbitProxy implements ChannelAwareMessageListener {
     }
 
     private SimpleMessageListenerContainer createListener(CachingConnectionFactory connectionFactory) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
         container.setConcurrentConsumers(1);    //当前的消费者数量
         container.setMaxConcurrentConsumers(5); //  最大的消费者数量
         container.setDefaultRequeueRejected(false); //是否重回队列
@@ -67,6 +69,7 @@ public abstract class RabbitProxy implements ChannelAwareMessageListener {
                 return queue + "_" + UUID.randomUUID().toString();
             }
         });
+
 
         return container;
     }
@@ -137,4 +140,9 @@ public abstract class RabbitProxy implements ChannelAwareMessageListener {
     }
 
     protected abstract void handleMessage(Message message, Channel channel);
+
+    @Override
+    public void onApplicationEvent(ApplicationStartedEvent applicationStartedEvent) {
+        this.listenerContainer.start();
+    }
 }

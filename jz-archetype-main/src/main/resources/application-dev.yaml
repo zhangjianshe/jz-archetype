@@ -13,11 +13,11 @@ dubbo:
 
 
 rabbit1:
-  host: 192.168.0.86
+  host: localhost
   port: 5672
-  username: admin
-  password: 123456
-  virtualHost: test
+  username: guest
+  password: guest
+  virtualHost: /
   publisherConfirms: true
   publisherReturns: true
   mandatory: true
