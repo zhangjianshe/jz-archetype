@@ -13,8 +13,8 @@ dubbo:
 
 
 rabbit1:
-  host: localhost
-  port: 5672
+  host: mapway.cn
+  cd jzport: 5672
   username: guest
   password: guest
   virtualHost: /
